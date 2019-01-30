@@ -9,24 +9,33 @@
 <body>
   <button id="bt1">所有的菜品</button>
   <button id="bt2">删除菜品</button>
-  <button id="bt3">添加新的菜品</button>
-  <button id="bt4">修改菜品</button>
+  <hr/>
+  <button id="bt3">上传菜品图片</button>
+  <input type="text" id="inputDecs">
+  <input type="file" id="inputFile">
+  <hr/>
+  <button id="bt4">添加新的菜品</button>
+  <button id="bt5">修改菜品</button>
+  <button id="bt6">获取某一道菜</button>
   <script src="./axios.min.js"></script>
   <script>
     bt1.onclick = function(){
       axios.get('http://127.0.0.1:8090/admin/dish').then((result)=>{
-        console.log(result)
+        console.log(result.data);
       }).catch((err)=>{
         console.log(err)
       })
     }
     bt2.onclick = function(){
-      //”预取请求“--preflight Request --options
-      axios.delete("http://127.0.0.1:8090/admin/category/5").then((result)=>{
-        console.log(result.data)
-      }).catch((err)=>{
-        console.log(err)
-      })
+     //异步上传文件
+     var data = new FormData();
+     data.append("descripton",inputDecs.value)
+     data.append('disnImg',inputFile.files[0])
+     axios.post('http://127.0.0.1:8090/admin/dish/image',data).then((res)=>{
+       console.log(res)
+     }).catch((err)=>{
+       console.log(err)
+     })
     }
     bt3.onclick = function(){
       var data = {cname:'鲜肉类'}
@@ -45,5 +54,24 @@
       })
     }
   </script>
+  <hr>
+  <button class = "btn">0</button>
+  <button class = "btn">1</button>
+  <button class = "btn">2</button>
+  <script>
+    var btnList = document.querySelectorAll(".btn");
+    for(let i=0;i<btnList.length;i++){
+      console.log("发送到发顺丰大是大非")
+      btnList[i].onclick = function(){
+        console.log(i)
+      }
+    }
+    // console.log(i)
+  </script>
+  <hr>
+  <form action="http://127.0.0.1:8090/admin/dish/image" method="POST" enctype="multipart/form-data">
+    <input type="file" name="dishImg"><br>
+    <input type="submit">
+  </form>
 </body>
 </html>

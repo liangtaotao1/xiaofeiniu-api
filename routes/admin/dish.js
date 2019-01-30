@@ -5,6 +5,8 @@ const express = require("express")
 const pool = require("../../pool")
 const router = express.Router()
 module.exports = router
+const multer = require('multer');
+const fs = require("fs")
 
 /**
  * api: GET /admin/dish
@@ -13,22 +15,56 @@ module.exports = router
  * aid:'',dishList:[]
  */
 router.get('/',(req,res)=>{
-  pool.query('SELECT * FROM xfn_category ORDER BY cid',(err,result)=>{
+  pool.query('SELECT cid,cname FROM xfn_category ORDER BY cid',(err,result)=>{
     if(err) throw err;
-    var dishList = result.data
-    console.log(dishList)
-    for(var c of dishList){
-      pool.query('SELECT * FROM xfn_dish WHERE categoryId=?',c.cid,(err,result)=>{
+    //res.send(result)
+    var categoryList = result
+    var finishCount = 0//已经查询完菜品的类别的数量
+    //循环体内出现异步操作用let                        
+    for(let c of categoryList){
+      pool.query('SELECT * FROM xfn_dish WHERE categoryId=? ORDER BY did DESC',c.cid,(err,result)=>{
         if(err) throw err;
-        //console.log(result)
-         console.log(result)
-        
-
+        c.dishList = result
+        //必须保证所有的类别下的菜品都查询完才能发送响应消息---这些查询都是异步的
+        finishCount++;
+        if(finishCount == categoryList.length){
+          res.send(categoryList)
+        }
       })
     }
-      res.send(result)
   })
 })
+/**
+ * POST /admin/dish/image
+ * 请求参数：
+ * 接收客户端上传的菜品图片，保存在服务器上，返回该图片在服务器上的随机文件名
+ */
+
+var upload = multer({
+  dest:"tmp/"  //指定
+})
+router.post('/image',upload.single('dishImg'),(req,res)=>{
+  console.log(req.file);  //客户端上传的图片
+  // console.log(req.body); //客户端上传的字符数据
+  var tmpFile = req.file.path; //临时文件
+  var suffix = req.file.originalname.substring(req.file.originalname.lastIndexOf("."))//原始文件名的后缀部分 
+  var newFile = randFileName(suffix)
+  fs.rename(tmpFile,'img/dish/'+newFile,()=>{
+    res.send({code:200,msg:"upload succ",FileName:newFile})//把临时文件转移
+  })
+  
+})
+//生成一个随机文件名
+//参数：suffix表示要生成的文件名的后缀
+function randFileName(suffix){
+  var time = new Date().getTime();//当前系统时间戳
+  var num = Math.floor(Math.random()*(10000-1000) + 1000)//4位随机数
+  return time + '-' + num + suffix
+}
+/**
+ * POST /admin/dish
+ * 添加一个新的菜品
+ */
 /**
  * api: DELETE /admin/category/:cid
  * 含义：根据菜品的编号的路由参数，删除该菜品
