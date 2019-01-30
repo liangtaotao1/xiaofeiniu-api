@@ -25,13 +25,13 @@ app.use(bodyParser.json());
 
 app.use(cors({
   "credentials":true,
-  "origin":"http://127.0.0.1:5500"
+  "origin":"http://127.0.0.1:8091"
 }))
 
 app.use("/admin/category",categoryRouter)
 app.use("/admin",adminRouter)
 app.use("/admin/dish",dishRouter)
-app.use("/asmin/settings",settingsRouter)
+app.use("/admin/settings",settingsRouter)
 
 
 

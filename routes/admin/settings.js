@@ -1,5 +1,5 @@
 const express= require("express")
-const pool= ("../../pool")
+const pool = require("../../pool")
 var router = express.Router()
 module.exports = router;
 
@@ -17,7 +17,7 @@ router.get('/',(req,res)=>{
  * put /admin/settings
  */
 router.put('/',(req,res)=>{
-  pool.query('UPDATE xfn_settings SET ?',(err,result)=>{
+  pool.query('UPDATE xfn_settings SET ?',req.body,(err,result)=>{
     if(err) throw err
     res.send({code:200,msg:"settings updated succ"})
   })
