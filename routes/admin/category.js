@@ -58,7 +58,7 @@ router.post("/",(req,res)=>{
     if(err) throw err
     //console.log(result)
     
-    res.send({code:200,msg:"1 category insert"})
+    res.send({code:200,msg:"1 category insert",cid:result.insertId})
     
     
   })
